@@ -9,10 +9,11 @@ const countdownElements = {
   seconds: document.querySelector('[data-seconds]'),
 };
 
-const flatpickr = require('flatpickr');
-
 const input = document.querySelector('#datetime-picker');
 input.value = '';
+
+const btn = document.querySelector('[data-start]');
+btn.addEventListener('click', handleDateTimeChange);
 
 const options = {
   enableTime: true,
@@ -20,12 +21,11 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose: function (selectedDates) {
-    const selectedDate = Date.parse(input.value);
-    const currentTime = Date.now();
-
-    if (selectedDate < currentTime) {
+    if (selectedDates[0].getTime() < Date.now()) {
       Notiflix.Notify.warning('Please choose a date in the future.');
+      btn.disabled = true;
     } else {
+      btn.disabled = false;
       handleDateTimeChange();
     }
   },
@@ -38,6 +38,9 @@ function handleDateTimeChange() {
 
   if (selectedDate > currentTime) {
     const timeDifference = selectedDate - currentTime;
+    if (timeDifference < 1000) {
+      return;
+    }
     const { days, hours, minutes, seconds } = convertMs(timeDifference);
     updateCountdown(countdownElements, days, hours, minutes, seconds);
   }
